@@ -1,0 +1,172 @@
+s# =====================================================
+# CROP DISEASE EXPERT SYSTEM
+# Rule-Based Expert System using Forward & Backward Chaining
+# =====================================================
+# Domain: Agriculture (Crop Disease Diagnosis)
+# =====================================================
+
+class CropDiseaseExpertSystem:
+    def __init__(self):
+        self.facts = set()
+        self.rules = []
+
+    # ------------------------------
+    # FACT MANAGEMENT
+    # ------------------------------
+    def add_fact(self, fact):
+        self.facts.add(fact)
+
+    def add_facts(self, facts):
+        for fact in facts:
+            self.add_fact(fact)
+
+    # ------------------------------
+    # RULE MANAGEMENT
+    # ------------------------------
+    def add_rule(self, conditions, conclusion):
+        self.rules.append((set(conditions), conclusion))
+
+    # ------------------------------
+    # FORWARD CHAINING (DATA-DRIVEN)
+    # ------------------------------
+    def forward_chaining(self):
+        print("\n FORWARD CHAINING STARTED - CropDiseaseExpertSystem:33")
+        changed = True
+
+        while changed:
+            changed = False
+            for conditions, conclusion in self.rules:
+                if conditions.issubset(self.facts) and conclusion not in self.facts:
+                    self.facts.add(conclusion)
+                    print(f"Rule Fired: {conditions} > {conclusion} - CropDiseaseExpertSystem:41")
+                    changed = True
+
+        print("FORWARD CHAINING COMPLETED - CropDiseaseExpertSystem:44")
+        return self.facts
+
+    # ------------------------------
+    # BACKWARD CHAINING (GOAL-DRIVEN)
+    # ------------------------------
+    def backward_chaining(self, goal, visited=None):
+        if visited is None:
+            visited = set()
+
+        if goal in self.facts:
+            print(f"Fact found: {goal} - CropDiseaseExpertSystem:55")
+            return True
+
+        if goal in visited:
+            return False
+
+        visited.add(goal)
+
+        for conditions, conclusion in self.rules:
+            if conclusion == goal:
+                print(f"Checking rule to prove {goal}: IF {conditions} - CropDiseaseExpertSystem:65")
+                if all(self.backward_chaining(cond, visited) for cond in conditions):
+                    self.facts.add(goal)
+                    print(f"Goal proved: {goal} - CropDiseaseExpertSystem:68")
+                    return True
+
+        print(f"Goal cannot be proved: {goal} - CropDiseaseExpertSystem:71")
+        return False
+
+
+# =====================================================
+# SYSTEM SETUP
+# =====================================================
+
+def build_system():
+    system = CropDiseaseExpertSystem()
+
+    # ------------------------------
+    # RULE DEFINITIONS (12 RULES)
+    # ------------------------------
+
+    # Maize Diseases
+    system.add_rule(['yellow_leaves', 'stunted_growth'], 'suspect_nitrogen_deficiency')
+    system.add_rule(['brown_spots', 'leaf_wilting'], 'suspect_leaf_blight')
+    system.add_rule(['suspect_leaf_blight'], 'apply_fungicide')
+
+    # Tomato Diseases
+    system.add_rule(['white_powder_on_leaves'], 'suspect_powdery_mildew')
+    system.add_rule(['suspect_powdery_mildew'], 'spray_sulfur_fungicide')
+
+    system.add_rule(['dark_spots_on_fruit', 'leaf_drop'], 'suspect_early_blight')
+    system.add_rule(['suspect_early_blight'], 'remove_infected_plants')
+
+    # General Crop Issues
+    system.add_rule(['holes_in_leaves', 'insects_visible'], 'suspect_pest_attack')
+    system.add_rule(['suspect_pest_attack'], 'apply_insecticide')
+
+    system.add_rule(['wilting', 'poor_yield'], 'suspect_root_disease')
+    system.add_rule(['suspect_root_disease'], 'improve_drainage')
+
+    # Final Advice
+    system.add_rule(['suspect_nitrogen_deficiency'], 'apply_nitrogen_fertilizer')
+
+    return system
+
+
+# =====================================================
+# TEST CASES
+# =====================================================
+
+def test_forward_chaining():
+    print("\n=== TEST CASE 1: FORWARD CHAINING === - CropDiseaseExpertSystem:116")
+    system = build_system()
+
+    initial_facts = [
+        'yellow_leaves',
+        'stunted_growth'
+    ]
+
+    system.add_facts(initial_facts)
+    final_facts = system.forward_chaining()
+
+    print("Final Facts: - CropDiseaseExpertSystem:127", final_facts)
+
+
+def test_backward_chaining():
+    print("\n=== TEST CASE 2: BACKWARD CHAINING === - CropDiseaseExpertSystem:131")
+    system = build_system()
+
+    system.add_facts([
+        'brown_spots',
+        'leaf_wilting'
+    ])
+
+    goal = 'apply_fungicide'
+    result = system.backward_chaining(goal)
+
+    print(f"Result for goal '{goal}': - CropDiseaseExpertSystem:142", result)
+
+
+# =====================================================
+# MAIN PROGRAM (INTERACTIVE MODE)
+# =====================================================
+
+if __name__ == '__main__':
+    system = build_system()
+
+    print("=== CROP DISEASE EXPERT SYSTEM === - CropDiseaseExpertSystem:152")
+    print("Enter observed symptoms one by one. - CropDiseaseExpertSystem:153")
+    print("Type 'done' when finished.\n - CropDiseaseExpertSystem:154")
+
+    while True:
+        symptom = input("Enter symptom: ").strip().lower()
+        if symptom == 'done':
+            break
+        if symptom:
+            system.add_fact(symptom)
+
+    print("\nSymptoms entered: - CropDiseaseExpertSystem:163", system.facts)
+
+    # Run forward chaining
+    system.forward_chaining()
+
+    print("\n OPTIONAL BACKWARD CHAINING - CropDiseaseExpertSystem:168")
+    goal = input("Enter a goal to prove (or press Enter to skip): ").strip().lower()
+    if goal:
+        result = system.backward_chaining(goal)
+        print(f"Result for goal '{goal}': - CropDiseaseExpertSystem:172", result)
